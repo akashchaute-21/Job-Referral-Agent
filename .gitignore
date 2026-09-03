@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Personal documents and generated drafts
+Akash_Chaute_Resume.pdf
+referral_email.txt
+*.ipynb
+
+# Local secrets and Streamlit configuration
+.streamlit/secrets.toml
+.env
+.env.*
+!.env.example
