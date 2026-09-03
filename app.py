@@ -1,3 +1,4 @@
+import html
 import getpass
 import mimetypes
 import smtplib
@@ -175,6 +176,8 @@ with left:
                     if resume else None
                 ),
             }
+            st.session_state["subject_editor"] = subject
+            st.session_state["body_editor"] = body
         except ValueError as error:
             st.error(str(error))
 
@@ -184,15 +187,23 @@ with right:
     if not draft:
         st.info("Your generated message will appear here for review.")
     else:
+        st.text_input("Subject", key="subject_editor")
+        st.text_area("Customize message", key="body_editor", height=360)
+        edited_subject = st.session_state["subject_editor"]
+        edited_body = st.session_state["body_editor"]
+        preview_name = html.escape(draft["recipient_name"])
+        preview_email = html.escape(draft["recipient_email"])
+        preview_subject = html.escape(edited_subject)
+        preview_body = html.escape(edited_body)
         attachment_name = draft["attachment"][0] if draft["attachment"] else "No attachment"
         st.markdown(
             f"""<div class='preview'>
             <div class='preview-label'>To</div>
-            <div class='mono'>{draft['recipient_name']} &lt;{draft['recipient_email']}&gt;</div>
+            <div class='mono'>{preview_name} &lt;{preview_email}&gt;</div>
             <div class='preview-label' style='margin-top:1rem'>Subject</div>
-            <div class='preview-subject'>{draft['subject']}</div>
+            <div class='preview-subject'>{preview_subject}</div>
             <div class='preview-label'>Message</div>
-            <div class='preview-body'>{draft['body']}</div>
+            <div class='preview-body'>{preview_body}</div>
             </div>""",
             unsafe_allow_html=True,
         )
@@ -219,8 +230,8 @@ if draft:
                     sender_email,
                     draft["recipient_email"],
                     app_password,
-                    draft["subject"],
-                    draft["body"],
+                    st.session_state["subject_editor"],
+                    st.session_state["body_editor"],
                     draft["attachment"],
                 )
                 st.success(f"Email sent to {draft['recipient_email']}.")
